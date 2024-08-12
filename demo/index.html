@@ -7,9 +7,72 @@
 </head>
 <body>
 
-  <!-- component goes here -->
+  <sc-form>
+    <form>
 
-  <script type="module">import "../sc-form.js";</script>
+      <!-- single inputs -->
+
+      <div>
+        <label for="firstName">First name</label>
+        <input type="text" id="firstName" required>
+      </div>
+
+      <div>
+        <label for="email">E-mail</label>
+        <input type="email" id="email">
+      </div>
+
+      <!-- select inputs -->
+
+      <fieldset role="radiogroup">
+        <legend>Choose one color</legend>
+
+        <div>
+          <input type="radio" name="color" id="red" value="red" required>
+          <label for="red">Red</label>
+        </div>
+
+        <div>
+          <input type="radio" name="color" id="green" value="green" required>
+          <label for="green">Green</label>
+        </div>
+
+        <div>
+          <input type="radio" name="color" id="blue" value="blue" required>
+          <label for="blue">Blue</label>
+        </div>
+      </fieldset>
+
+      <label for="another-color">Choose another color</label>
+      <select name="another-color" id="another-color" required>
+        <option value=""></option>
+        <option value="cyan">Cyan</option>
+        <option value="magenta">Magenta</option>
+        <option value="yellow">Yellow</option>
+        <option value="black">Black</option>
+      </select>
+
+      <!-- multi select -->
+
+      <fieldset data-required>
+        <legend>What fruits do you like?</legend>
+
+        <input type="checkbox" name="fruits" id="banana" value="banana" />
+        <label for="banana">Banana</label>
+
+        <input type="checkbox" name="fruits" id="apple" value="apple" />
+        <label for="apple">Apple</label>
+
+        <input type="checkbox" name="fruits" id="pear" value="pear" />
+        <label for="pear">Pear</label>
+      </fieldset>
+
+      <button type="submit">Submit!</button>
+
+    </form>
+  </sc-form>
+
+  <script type="module">import "../src/sc-form.js";</script>
 
 </body>
 </html>
