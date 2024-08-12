@@ -34,5 +34,5 @@ Or use minified versions:
 ```html
 <sc-form>
   <!-- TODO -->
-</sc-privacy-modal>
+</sc-form>
 ```
