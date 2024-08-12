@@ -1,0 +1,31 @@
+{
+  "name": "@spartan-components/sc-form",
+  "version": "0.0.0",
+  "description": "A thin wrapper for html form elements to improve error handling.",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && rollup --config",
+    "clean": "rm -rf ./dist",
+    "dev": "web-dev-server --open demo --watch",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spartan-components/sc-form.git"
+  },
+  "keywords": [
+    "Web components",
+    "Form error handling"
+  ],
+  "author": "Spartan Components",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/spartan-components/sc-form/issues"
+  },
+  "homepage": "https://github.com/spartan-components/sc-form#readme",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "@web/dev-server": "^0.4.6",
+    "rollup": "^4.20.0"
+  }
+}
