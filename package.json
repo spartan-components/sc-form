@@ -7,7 +7,7 @@
     "build": "npm run clean && rollup --config",
     "clean": "rm -rf ./dist",
     "dev": "web-dev-server --open demo --watch",
-    "prepublish": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
