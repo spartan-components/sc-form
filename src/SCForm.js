@@ -54,17 +54,34 @@ class SCForm extends HTMLElement {
   }
 
   checkInput(element) {
-    // for checkboxes, do not check validity,
-    // if next element is also a checkbox
-    const isCheckbox = element.type === 'checkbox';
-
-    let valid = isCheckbox
+    const valid = this.validatableGroupCheckbox(element)
       ? this.validateCheckbox(element)
       : element.validity.valid;
 
     // add or remove error message depending on state
     if (valid) this.removeErrorMessage(element);
     if (!valid) this.addErrorMessage(element);
+  }
+
+  /**
+   * Check, if we're dealing with a group of checkboxes, that has a data-required attribute set on it's parent fieldset
+   * @param {HTMLElement} element The element to check
+   * @returns {boolean}
+   */
+  validatableGroupCheckbox(element) {
+    // get parent fieldset
+    const parent = element.closest('fieldset');
+    // is it required?
+    const required = parent?.hasAttribute('data-required');
+
+    // early return if doesn't have to be validated
+    if(!required) return false;
+
+    // get sibling checkboxes
+    const siblingCheckboxes = this.querySelectorAll(`input[name=${element.name}]`);
+
+    // if there is more than 1 sibling element, we have to validate
+    return siblingCheckboxes.length > 1
   }
 
   /**
@@ -75,22 +92,19 @@ class SCForm extends HTMLElement {
   validateCheckbox(element) {
     // get parent fieldset
     const parent = element.closest('fieldset');
-    // is it required?
-    const required = parent?.hasAttribute('data-required');
 
-    // early return if not required
-    if (!required) return true;
-
-    // get all values
+    // get all form values
     const formData = new FormData(this.form);
+
+    // get all values of same checkbox group
     const values = formData.getAll(element.name);
 
-    // check if at least 1 option specified
+    // check if at least 1 box is checked
     const isValid = values.length > 0;
 
     if (!isValid) {
-      // todo: Add ways to customize error message 
-      element.setCustomValidity('Choose at least one option');
+      // todo: Add ways to customize the error message 
+      element.setCustomValidity(parent.dataset.error ?? 'Choose at least one option');
     } else {
       element.setCustomValidity('');
     }
