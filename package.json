@@ -1,6 +1,6 @@
 {
   "name": "@spartan-components/sc-form",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A thin wrapper for html form elements to improve error handling.",
   "main": "index.js",
   "scripts": {
