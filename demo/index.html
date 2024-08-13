@@ -22,6 +22,11 @@
         <input type="email" id="email">
       </div>
 
+      <div>
+        <label for="termsOfService">Accept our Terms of Service</label>
+        <input type="checkbox" name="termsOfService" id="termsOfService" required>
+      </div>
+
       <!-- select inputs -->
 
       <fieldset role="radiogroup">
@@ -54,7 +59,7 @@
 
       <!-- multi select -->
 
-      <fieldset data-required>
+      <fieldset data-required data-error="Please choose at least one fruit">
         <legend>What fruits do you like?</legend>
 
         <input type="checkbox" name="fruits" id="banana" value="banana" />
