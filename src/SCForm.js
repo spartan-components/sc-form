@@ -28,8 +28,8 @@ class SCForm extends HTMLElement {
   }
 
   handleEvent(event) {
-    if(event.type === 'blur') {
-      this.checkInput(event);
+    if(event.type === 'blur' && !this.skippableCheckbox(event)) {
+      this.checkInput(event.target);
     }
 
     if(event.type === 'submit') {
@@ -37,24 +37,34 @@ class SCForm extends HTMLElement {
     }
   }
 
-  checkInput(event) {
-    // shorthand for input element
-    const element = event.target;
+  /**
+   * Only validate group-checkboxes if we're tabbing to anything but a sibling checkbox
+   * @param {Event} event The event
+   * @returns {boolean} Wheter it's a checkbox that doesn't have to be checked
+   */
+  skippableCheckbox(event) {
+    // check if we're dealing with a checkbox
+    const isCheckbox = event.target.type === 'checkbox';
+    // check if the element that is beeing tabbed to is also a checkbox
+    const nextIsCheckbox = event?.relatedTarget?.type === 'checkbox';
+    // check if the element that is beeing tabbed shares the same name attribute
+    const nextIsSiblingField = event?.relatedTarget?.name === event.target.name;
 
+    return isCheckbox && nextIsCheckbox && nextIsSiblingField;
+  }
+
+  checkInput(element) {
     // for checkboxes, do not check validity,
     // if next element is also a checkbox
     const isCheckbox = element.type === 'checkbox';
-    const nextIsCheckbox = event?.relatedTarget?.type === 'checkbox' && event.relatedTarget.name === element.name;
-
-    if(isCheckbox && nextIsCheckbox) return;
 
     let valid = isCheckbox
       ? this.validateCheckbox(element)
       : element.validity.valid;
 
     // add or remove error message depending on state
-    if (valid) this.removeErrorMessage(event.target);
-    if (!valid) this.addErrorMessage(event.target);
+    if (valid) this.removeErrorMessage(element);
+    if (!valid) this.addErrorMessage(element);
   }
 
   /**
@@ -177,17 +187,7 @@ class SCForm extends HTMLElement {
     event.preventDefault();
 
     if(!this.form.checkValidity()) {
-      this.inputs.forEach(element => {
-        const isCheckbox = element.type === 'checkbox';
-
-        let valid = isCheckbox
-          ? this.validateCheckbox(element)
-          : element.validity.valid;
-  
-        // add or remove error message depending on state
-        if (valid) this.removeErrorMessage(element);
-        if (!valid) this.addErrorMessage(element);
-      })
+      this.inputs.forEach(element => this.checkInput(element));
     }
   }
 }
