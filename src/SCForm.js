@@ -15,9 +15,7 @@ class SCForm extends HTMLElement {
 
   setupEventHandlers() {
     // listen for change events on inputs
-    this.inputs.forEach(input => {
-      input.addEventListener('blur', this);
-    });
+    this.inputs.forEach(input => input.addEventListener('blur', this));
 
     // listen for submit event on form
     this.form.addEventListener('submit', this);
@@ -25,10 +23,7 @@ class SCForm extends HTMLElement {
 
   // remove event listeners
   disconnectedCallback() {
-    this.inputs.forEach(input => {
-      input.removeEventListener('blur', this);
-    });
-
+    this.inputs.forEach(input => input.removeEventListener('blur', this));
     this.form.removeEventListener('submit', this);
   }
 
@@ -68,6 +63,7 @@ class SCForm extends HTMLElement {
    * @returns {boolean} True or false, if the element is valid or not
    */
   validateCheckbox(element) {
+    // get parent fieldset
     const parent = element.closest('fieldset');
     // is it required?
     const required = parent?.hasAttribute('data-required');
@@ -93,6 +89,51 @@ class SCForm extends HTMLElement {
   }
 
   /**
+   * Find out, if a given HTML form field let's the user choose from multiple options
+   * @param {HTMLElement} element The element to check
+   * @returns {boolean}
+   */
+  isMultiElement(element) {
+    // if there are multiple elements with the same name attribute, we know
+    // that the element has to be treated differently
+    return element.name && this.querySelectorAll(`[name=${element.name}]`).length > 1;
+  }
+
+  /**
+   * @typedef {Object} ErrorData
+   * @property {HTMLElement} appendToElement The element underneath which the error will be rendered
+   * @property {HTMLElement} errorElement The element, that will be marked as invalid
+   * @property {string} errorId The ID for linking the invalid field and the corresponding error message
+   * @property {string} errorSpan A string containing a span element with the error message and the corresponding error ID
+   */
+
+  /**
+   * Get shared data for rendering and removing error messages
+   * @param {HTMLElement} element The element to get the error references for
+   * @returns {ErrorData}
+   */
+  getErrorData(element) {
+    // for multi elements, we have to reference different nodes
+    const isMultiElement = this.isMultiElement(element);
+
+    // define the data
+    const appendToElement = isMultiElement
+      ? element.closest('fieldset').querySelector('legend')
+      : this.querySelector(`label[for=${element.id}]`);
+
+    const errorElement = isMultiElement ? element.closest('fieldset') : element;
+    const errorId = `${isMultiElement ? element.name : element.id}-error`;
+    const errorSpan = `<span id=${errorId}>${element.validationMessage}</span>`;
+
+    return {
+      appendToElement,
+      errorElement,
+      errorId,
+      errorSpan,
+    }
+  }
+
+  /**
    * Function to add an error message to an invalid form element
    * @param {HTMLElement} element The element to add an error message to
    */
@@ -100,56 +141,34 @@ class SCForm extends HTMLElement {
     // remove any pre-existing error messages
     this.removeErrorMessage(element);
 
-    // elements with multiple options have to be treated differently
-    const isMultiElement = this.isMultiElement(element);
+    // get data needed for rendering the error
+    const {
+      appendToElement,
+      errorElement,
+      errorId,
+      errorSpan,
+    } = this.getErrorData(element);
 
-    // get reference element for error
-    const errorRef = this.getErrorReference(element);
-
-    // get element to set aria error states
-    const errorElement = isMultiElement ? element.closest('fieldset') : element;
-    const identifier = isMultiElement ? element.name : element.id;
-
-    // prepare error id
-    const errorId = `${identifier}-error`;
-
-    // set aria error states
-    errorElement.setAttribute('aria-invalid', true);
+    // set error attributes
+    errorElement.setAttribute('aria-invalid', "true");
     errorElement.setAttribute('aria-describedby', errorId);
 
-    // add error message
-    const errorSpan = `<span id=${errorId}>${element.validationMessage}</span>`;
-    errorRef.insertAdjacentHTML('afterend', errorSpan);
-  }
-
-  // todo: add JS doc
-  isMultiElement(element) {
-    // if there are multiple elements with the same name attribute, we know
-    // that the element has to be treated differently
-    return element.name && this.querySelectorAll(`[name=${element.name}]`).length > 1;
-  }
-
-  // todo: add JS doc
-  getErrorReference(element) {
-    const isMultiElement = this.isMultiElement(element);
-
-    if(isMultiElement) {
-      return element.closest('fieldset').querySelector('legend');
-    } else {
-      return this.querySelector(`label[for=${element.id}]`);
-    }
+    // set error message
+    appendToElement.insertAdjacentHTML('afterend', errorSpan);
   }
 
   removeErrorMessage(element) {
-    const isMultiElement = this.isMultiElement(element);
+    // get data needed for removing the error
+    const {
+      errorElement,
+      errorId
+    } = this.getErrorData(element);
 
-    const errorElement = isMultiElement ? element.closest('fieldset') : element;
-    const identifier = isMultiElement ? element.getAttribute('name') : element.id;
-
-    const errorId = `${identifier}-error`;
+    // remove error attributes
     errorElement.removeAttribute('aria-invalid');
     errorElement.removeAttribute('aria-describedby');
 
+    // remove error message
     this.form.querySelector(`#${errorId}`)?.remove();
   }
 
