@@ -197,10 +197,9 @@ class SCForm extends HTMLElement {
   }
 
   checkForm(event) {
-    // prevent form submission
-    event.preventDefault();
-
     if(!this.form.checkValidity()) {
+      // prevent form submission
+      event.preventDefault();
       this.inputs.forEach(element => this.checkInput(element));
     }
   }
