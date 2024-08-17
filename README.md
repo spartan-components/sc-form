@@ -2,12 +2,12 @@
 
 A thin wrapper for html `<form>` elements to imporove error handling.
 
-`<sc-form>` utilizes native HTML form validation, but optimizes it in a few ways:
+`<sc-form>` optimizes native html form validation:
 
-- Validates form inputs, when they loose focus
-- Validates all form inputs, when the form is submitted
-- Adds an error message underneath the input label
-- Adds validation pattern for checkbox groups
+- Validates form inputs when they loose focus
+- Validates all form inputs when the form is submitted
+- Adds an error message underneath the input label (instead of adding a popup)
+- Adds a validation pattern for [checkbox groups](#checkbox-group)
 
 ## Installation
 Available on [npm](https://www.npmjs.com/) as [**@spartan-components/sc-form**](https://www.npmjs.com/package/@spartan-components/sc-form).
@@ -52,7 +52,7 @@ Simply wrap `<sc-form>` around a `<form>` tag:
 
 The component expects the form elements to be written in a specific style.
 
-For regular `<input>`, `<textarea>` and `<select>` elements, a label is required that is referenced using `id` and `for` like this:
+For regular `<input>`, `<textarea>` and `<select>` elements, a label is required that is referenced using `id` and `for`:
 
 ```html
 <sc-form>
@@ -63,11 +63,11 @@ For regular `<input>`, `<textarea>` and `<select>` elements, a label is required
 </sc-form>
 ```
 
-When you want to use radio buttons or multiple checkboxes, you need to group them inside a `<fieldset>` and add a `<legend>` to it:
+When you want to use radio buttons or multiple checkboxes, you need to group them inside a `<fieldset>` and add a `<legend>` to it.
 
 #### Radio group
 
-For radio groups, add the required attribute to all `<input type="radio">` elements, and set `role="radiogroup"` on the `<fieldset>`
+For radio groups, add the required attribute to all `<input type="radio">` elements, and set `role="radiogroup"` on the `<fieldset>`:
 
 ```html
 <sc-form>
@@ -90,9 +90,9 @@ For radio groups, add the required attribute to all `<input type="radio">` eleme
 
 #### Checkbox group
 
-In HTML there is way, to mark a group of checkboxes as required (meaning, there has to be at least one checkbox ticked).
+There is no native form validation pattern to check if at least one checkbox of a checkbox group is ticked. `<sc-form>` enables this functionality.
 
-However, `<sc-form>` enables this functionality. For this, set the `data-required` attribute on the `<fieldset>`. You can optionally specify a custom error message by using the `data-error` attribute.
+For this, set the `data-required` attribute on the `<fieldset>`. You can optionally specify a custom error message by using the `data-error` attribute.
 
 ```html
 <sc-form>
@@ -111,4 +111,22 @@ However, `<sc-form>` enables this functionality. For this, set the `data-require
     </fieldset>
   </form>
 </sc-form>
+```
+
+### Form submission with JS
+
+To submit the form using JS check if the form is valid by calling the  `checkValidity()` method of the form:
+
+```js
+// get reference to form element
+const form = document.querySelector('form');
+
+// listen for submit
+form.addEventListener('submit', function() {
+  // check if form is valid
+  if(form.checkValidity()) {
+    // submit the form
+    form.submit();
+  }
+});
 ```
