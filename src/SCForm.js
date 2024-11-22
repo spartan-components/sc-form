@@ -3,36 +3,47 @@ class SCForm extends HTMLElement {
     super();
 
     // setup references
-    this.form = this.querySelector('form');
-    this.buttonSubmit = this.form.querySelector('button[type=submit]');
-    this.inputs = this.form.querySelectorAll('input, textarea, select');
+    this.form = this.querySelector("form");
+    this.formId = this.form.id;
+    this.fields = this.form.elements;
+    // this.buttonSubmit = this.fields.item("submit");
 
     // disable native form validation
-    this.form.setAttribute('novalidate', 'true');
+    this.form.setAttribute("novalidate", "true");
 
     this.setupEventHandlers();
   }
 
   setupEventHandlers() {
     // listen for change events on inputs
-    this.inputs.forEach(input => input.addEventListener('blur', this));
+    // this.inputs.forEach((input) => input.addEventListener("blur", this));
+    for (const field of this.fields) {
+      if (field.type !== "submit") {
+        field.addEventListener("blur", this);
+      }
+    }
 
     // listen for submit event on form
-    this.form.addEventListener('submit', this);
+    this.form.addEventListener("submit", this);
   }
 
   // remove event listeners
   disconnectedCallback() {
-    this.inputs.forEach(input => input.removeEventListener('blur', this));
-    this.form.removeEventListener('submit', this);
+    // this.fields.forEach((input) => input.removeEventListener("blur", this));
+    for (const field of this.fields) {
+      if (field.type !== "submit") {
+        field.removeEventListener("blur", this);
+      }
+    }
+    this.form.removeEventListener("submit", this);
   }
 
   handleEvent(event) {
-    if(event.type === 'blur' && !this.skippableCheckbox(event)) {
+    if (event.type === "blur" && !this.skippableCheckbox(event)) {
       this.checkInput(event.target);
     }
 
-    if(event.type === 'submit') {
+    if (event.type === "submit") {
       this.checkForm(event);
     }
   }
@@ -44,9 +55,9 @@ class SCForm extends HTMLElement {
    */
   skippableCheckbox(event) {
     // check if we're dealing with a checkbox
-    const isCheckbox = event.target.type === 'checkbox';
+    const isCheckbox = event.target.type === "checkbox";
     // check if the element that is beeing tabbed to is also a checkbox
-    const nextIsCheckbox = event?.relatedTarget?.type === 'checkbox';
+    const nextIsCheckbox = event?.relatedTarget?.type === "checkbox";
     // check if the element that is beeing tabbed shares the same name attribute
     const nextIsSiblingField = event?.relatedTarget?.name === event.target.name;
 
@@ -70,18 +81,20 @@ class SCForm extends HTMLElement {
    */
   validatableGroupCheckbox(element) {
     // get parent fieldset
-    const parent = element.closest('fieldset');
+    const parent = element.closest("fieldset");
     // is it required?
-    const required = parent?.hasAttribute('data-required');
+    const required = parent?.hasAttribute("data-required");
 
     // early return if doesn't have to be validated
-    if(!required) return false;
+    if (!required) return false;
 
     // get sibling checkboxes
-    const siblingCheckboxes = this.querySelectorAll(`input[name=${element.name}]`);
+    const siblingCheckboxes = this.querySelectorAll(
+      `input[name=${element.name}]`
+    );
 
     // if there is more than 1 sibling element, we have to validate
-    return siblingCheckboxes.length > 1
+    return siblingCheckboxes.length > 1;
   }
 
   /**
@@ -91,7 +104,7 @@ class SCForm extends HTMLElement {
    */
   validateCheckbox(element) {
     // get parent fieldset
-    const parent = element.closest('fieldset');
+    const parent = element.closest("fieldset");
 
     // get all form values
     const formData = new FormData(this.form);
@@ -103,10 +116,12 @@ class SCForm extends HTMLElement {
     const isValid = values.length > 0;
 
     if (!isValid) {
-      // todo: Add ways to customize the error message 
-      element.setCustomValidity(parent.dataset.error ?? 'Choose at least one option');
+      // todo: Add ways to customize the error message
+      element.setCustomValidity(
+        parent.dataset.error ?? "Choose at least one option"
+      );
     } else {
-      element.setCustomValidity('');
+      element.setCustomValidity("");
     }
 
     return isValid;
@@ -120,7 +135,9 @@ class SCForm extends HTMLElement {
   isMultiElement(element) {
     // if there are multiple elements with the same name attribute, we know
     // that the element has to be treated differently
-    return element.name && this.querySelectorAll(`[name=${element.name}]`).length > 1;
+    return (
+      element.name && this.querySelectorAll(`[name=${element.name}]`).length > 1
+    );
   }
 
   /**
@@ -142,10 +159,10 @@ class SCForm extends HTMLElement {
 
     // define the data
     const appendToElement = isMultiElement
-      ? element.closest('fieldset').querySelector('legend')
+      ? element.closest("fieldset").querySelector("legend")
       : this.querySelector(`label[for=${element.id}]`);
 
-    const errorElement = isMultiElement ? element.closest('fieldset') : element;
+    const errorElement = isMultiElement ? element.closest("fieldset") : element;
     const errorId = `${isMultiElement ? element.name : element.id}-error`;
     const errorSpan = `<span id=${errorId}>${element.validationMessage}</span>`;
 
@@ -154,7 +171,7 @@ class SCForm extends HTMLElement {
       errorElement,
       errorId,
       errorSpan,
-    }
+    };
   }
 
   /**
@@ -166,41 +183,37 @@ class SCForm extends HTMLElement {
     this.removeErrorMessage(element);
 
     // get data needed for rendering the error
-    const {
-      appendToElement,
-      errorElement,
-      errorId,
-      errorSpan,
-    } = this.getErrorData(element);
+    const { appendToElement, errorElement, errorId, errorSpan } =
+      this.getErrorData(element);
 
     // set error attributes
-    errorElement.setAttribute('aria-invalid', "true");
-    errorElement.setAttribute('aria-describedby', errorId);
+    errorElement.setAttribute("aria-invalid", "true");
+    errorElement.setAttribute("aria-describedby", errorId);
 
     // set error message
-    appendToElement.insertAdjacentHTML('afterend', errorSpan);
+    appendToElement.insertAdjacentHTML("afterend", errorSpan);
   }
 
   removeErrorMessage(element) {
     // get data needed for removing the error
-    const {
-      errorElement,
-      errorId
-    } = this.getErrorData(element);
+    const { errorElement, errorId } = this.getErrorData(element);
 
     // remove error attributes
-    errorElement.removeAttribute('aria-invalid');
-    errorElement.removeAttribute('aria-describedby');
+    errorElement.removeAttribute("aria-invalid");
+    errorElement.removeAttribute("aria-describedby");
 
     // remove error message
     this.form.querySelector(`#${errorId}`)?.remove();
   }
 
   checkForm(event) {
-    if(!this.form.checkValidity()) {
+    if (!this.form.checkValidity()) {
       // prevent form submission
       event.preventDefault();
-      this.inputs.forEach(element => this.checkInput(element));
+      for (const field of this.fields) {
+        this.checkInput(field);
+      }
+      // this.fields.forEach((element) => this.checkInput(element));
     }
   }
 }
