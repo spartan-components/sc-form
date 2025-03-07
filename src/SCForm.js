@@ -4,9 +4,8 @@ class SCForm extends HTMLElement {
 
     // setup references
     this.form = this.querySelector("form");
-    this.formId = this.form.id;
-    this.fields = this.form.elements;
-    // this.buttonSubmit = this.fields.item("submit");
+    // this.buttonSubmit = this.form.querySelector("button[type=submit]");
+    this.inputs = this.form.querySelectorAll("input, textarea, select");
 
     // disable native form validation
     this.form.setAttribute("novalidate", "true");
@@ -16,12 +15,7 @@ class SCForm extends HTMLElement {
 
   setupEventHandlers() {
     // listen for change events on inputs
-    // this.inputs.forEach((input) => input.addEventListener("blur", this));
-    for (const field of this.fields) {
-      if (field.type !== "submit") {
-        field.addEventListener("blur", this);
-      }
-    }
+    this.inputs.forEach((input) => input.addEventListener("blur", this));
 
     // listen for submit event on form
     this.form.addEventListener("submit", this);
@@ -29,12 +23,7 @@ class SCForm extends HTMLElement {
 
   // remove event listeners
   disconnectedCallback() {
-    // this.fields.forEach((input) => input.removeEventListener("blur", this));
-    for (const field of this.fields) {
-      if (field.type !== "submit") {
-        field.removeEventListener("blur", this);
-      }
-    }
+    this.inputs.forEach((input) => input.removeEventListener("blur", this));
     this.form.removeEventListener("submit", this);
   }
 
@@ -210,10 +199,7 @@ class SCForm extends HTMLElement {
     if (!this.form.checkValidity()) {
       // prevent form submission
       event.preventDefault();
-      for (const field of this.fields) {
-        this.checkInput(field);
-      }
-      // this.fields.forEach((element) => this.checkInput(element));
+      this.inputs.forEach((element) => this.checkInput(element));
     }
   }
 }
